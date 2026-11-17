@@ -6,11 +6,11 @@
       "comments": [
         {
           "target": "very important",
-          "text": "Try to be more precise"
+          "text": "“非常重要”过于笼统，建议换成更精确的程度表达，如 a key role 或 should receive greater attention。"
         },
         {
           "target": "also important",
-          "text": "This sounds repetitive"
+          "text": "与前句重复；这里需要体现对比，建议用 while / whereas 引出另一方的观点。"
         }
       ],
       "rewrite": "Some people argue that practical skills should receive greater attention at school, while others believe academic subjects remain more valuable."
@@ -20,11 +20,11 @@
       "comments": [
         {
           "target": "have reasons",
-          "text": "Slightly vague"
+          "text": "“有道理”表述含糊，应写明双方论点的具体依据，如 both views have merit。"
         },
         {
           "target": "better",
-          "text": "Use a more academic comparison"
+          "text": "口语化的比较级；学术写作中建议用 deserve more emphasis 或 more valuable。"
         }
       ],
       "rewrite": "In my view, although academic subjects are essential, practical skills deserve more emphasis because they prepare students for everyday and professional challenges."
@@ -34,7 +34,7 @@
       "comments": [
         {
           "target": "managing money",
-          "text": "Good example"
+          "text": "这是本段唯一的例子，建议扩展为 financial management，与 cooking 并列更自然。"
         }
       ],
       "rewrite": "For example, learning basic cooking and financial management can help young people become more independent."
@@ -48,12 +48,13 @@
     "Overall": "6.5"
   },
   "score_explanation": [
-    "The position is relevant, but the support is still quite general.",
-    "Vocabulary is clear, but several phrases are repetitive or vague."
+    "立场与题目相关，但论据仍偏笼统，缺少具体解释和例子支撑。",
+    "词汇基本清楚，但多处表达重复、含糊，影响精确度。"
   ],
   "focus_feedback": [
-    "To reach a secure Band 7.5, develop each main idea with clearer explanation and a specific example.",
-    "To move toward 8.0, use more flexible academic collocations and make topic vocabulary more precise."
+    "要达到稳定的 Band 7.5，先用“解释 + 具体例子”把每个主体段的论点展开完整。",
+    "减少 very important / also important 这类笼统、重复的表达，改用更精确的搭配。",
+    "向 8.0 迈进时，注意衔接手段的多样性，并避免只靠 for example 罗列例子。"
   ],
   "model_essay": [
     "There is ongoing debate about whether schools should place greater emphasis on practical skills or traditional academic subjects. While academic learning remains essential for intellectual development and future study, I believe practical skills should also receive more attention because they prepare students for real-life challenges.",

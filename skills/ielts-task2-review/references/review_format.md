@@ -1,97 +1,105 @@
-# Reviewed DOCX Format
+# Reviewed HTML Format
 
-Use this structure for every reviewed IELTS Task 2 document.
+每次 Task 2 批改输出**一个自包含 HTML 文件**（不是 DOCX）。浏览器直接打开可读、可打印；不引用任何外部 CSS、JS、字体或图片。本文档规定 HTML 的结构、class 名与中英文分工。
 
-## Sections
+## 输出文件命名
 
-1. Original DOCX content
-   - Keep the student's original file content at the start of the reviewed DOCX.
-   - For DOCX input, this preserves the original prompt and student essay, so do not repeat the prompt.
-2. Reviewed essay content
-   - Use `review_units.original` to locate the matching original essay paragraph in the copied DOCX.
-   - Word comments must be anchored directly to specific target words/phrases inside the original paragraph.
-   - For DOCX input, the matched paragraph must be one of the extracted student essay paragraphs, not the prompt or outline.
-   - Do not append a second copy of the student's essay just to hold comments.
-   - Insert the italic rewrite immediately after the matched original paragraph when improvement is useful.
-   - Do not use a visible `Reviewed Essay` heading.
-3. Score lines and focused feedback
-   - Start this page after the reviewed essay content.
-   - Do not use a visible `Score` heading.
-   - Task Response
-   - Coherence & Cohesion
-   - Lexical Resource
-   - Grammatical Range & Accuracy
-   - Overall
-   - Each score may be a whole or half band; do not round criterion estimates to integers.
-   - One or a few short evidence-based scoring notes.
-4. `To Reach Band 7.5 / 8.0`
-   - This is the only visible section title retained after the essay review.
-   - Concise focus list.
-   - Mention blockers preventing stable Band 7.5 first.
-   - Then mention the most useful move toward 8.0.
-5. Model essay
-   - Start this on a new page after the score and focus feedback page.
-   - Do not use a visible `Model Essay` heading.
-   - 250-300 words.
-   - Exactly 4 paragraphs:
-     1. Introduction: paraphrase the prompt and state the essay's position.
-     2. Body paragraph 1.
-     3. Body paragraph 2.
-     4. Conclusion: begin with `In conclusion`.
-   - Leave one blank line between model essay paragraphs.
-   - Use the student's core ideas where possible.
-   - Correct off-topic or flawed logic.
-   - Stable Band 8.0 standard: clear and well-developed position, relevant and well-extended support, well-managed cohesion, flexible topic vocabulary, and mostly error-free grammar.
+- DOCX 输入：输出到输入文件同目录，`MyEssay.docx` → `MyEssay(reviewed).html`。
+- 粘贴文本输入：用 `--output` 指定路径；未指定时输出到当前目录 `IELTS_Task2_Reviewed_YYYYMMDD_HHMM.html`。
+- 永不覆盖原始输入；默认遇到同名输出时自动改用 `(reviewed 2).html` 等，只有显式 `--overwrite` 才覆盖。
+- 输入仍是**未批改过的 `.docx`**：先运行 `scripts/extract_task2_input.py`，提取流程与旧 DOCX 流程相同。
 
-## Filename Rules
+## 五段结构
 
-- DOCX input: output beside the input file.
-  - `MyEssay.docx` -> `MyEssay(reviewed).docx`
-  - If that exists, use `MyEssay(reviewed) 2.docx` or another non-overwriting variant.
-- Pasted text input: output to `/Users/aaronliang/Desktop/IELTS_Task2_Reviewed_YYYYMMDD_HHMM.docx`.
-- Never overwrite the original essay unless explicitly requested.
+输出必须按以下顺序包含五段。评分针对**学生原稿**，不是改写稿。
 
-## Input Parsing Rules
+1. **页头**：`header.review-header`
+   - `<h1>` 中文标题（如“雅思写作 Task 2 批改报告”）。
+   - `<dl class="meta">` 列出输入文件名、批改日期、目标分（默认 Band 7.5 改写 / Band 8.0 范文）。
+   - `div.prompt`：`<h2>题目</h2>` + `p.prompt-text`（题目保持英文原文）。
+   - `table.score-table`：四项分数 + 总分（Overall），行标签中文并括注英文评分项名称。
+   - `ul.score-notes`：中文评分说明（来自 `score_explanation`）。
+2. **带批注的原文**：`section#reviewed-text`
+   - 按顺序复现学生原文段落，每段一个 `div.paragraph-block > p.original`。
+   - 凡有批注的词句用 `<mark class="comment" data-comment="N" data-target="原文词句">原文词句<sup class="comment-ref">N</sup></mark>` 包裹；编号从 1 连续递增。
+   - 批注列在该段下方：`ol.comment-list > li.comment-item[data-comment="N"]`，内含 `span.comment-target`（原文词句）和 `span.comment-text`（中文批注）。
+3. **斜体改写**：每个 `paragraph-block` 内，原文段与批注之后放 `div.rewrite`
+   - `p.rewrite-text > em`：英文 Band 7.5 改写，斜体。
+   - `p.rewrite-note`：一句中文说明，讲清改了什么、为什么这样改。
+4. **简短反馈**：`section#feedback`
+   - `<h2>简短反馈</h2>`。
+   - `<h3>优点</h3>` + `ul.strengths`（至少 1 条中文）。
+   - `<h3>优先改进点</h3>` + `ol.improvements`（3–5 条中文，先写阻止稳定 Band 7.5 的问题，再写迈向 8.0 的方向）。
+5. **范文**：`section#model-essay`
+   - `<h2>Band 8.0 范文</h2>`，四个 `p.model-paragraph`（英文，250–300 词，四段：引言 / 主体一 / 主体二 / In conclusion 结论）。
+   - `p.model-wordcount` 中文词数行。
+   - `div.model-note`：`<h3>范文结构说明</h3>` + `ol.structure-notes`（4 条中文，说明每段作用）。
 
-- Normal DOCX input should be an unreviewed student file containing only the prompt, optional outline, and student essay.
-- For DOCX input, run `scripts/extract_task2_input.py` before reviewing.
-- Exclude outline/planning bullets from the scored essay.
-- Existing comments, italic rewrites, feedback, or a model essay are accidental leftovers, not normal input. If detected, ignore them for scoring and rewriting; score only the student's original essay.
-- Use `scripts/find_teacher_sample.py` to avoid filename mismatch between names with spaces and bundled samples with underscores.
+## CSS class 约定
 
-## Cleanup Rules
+| 选择器 | 作用 |
+| --- | --- |
+| `header.review-header` | 页头（标题、元信息、题目、分数表、评分说明） |
+| `dl.meta` | 输入文件 / 日期 / 目标分 |
+| `table.score-table` | 四项分数 + 总分表；整体行加 `.overall` |
+| `ul.score-notes` | 中文评分说明 |
+| `section#reviewed-text` | 带批注的正文 |
+| `div.paragraph-block` | 一个原文段落 + 该段批注 + 该段改写 |
+| `p.original` | 学生原文（英文） |
+| `mark.comment` | 批注锚点高亮；`data-comment` 为编号，`data-target` 为原文词句 |
+| `sup.comment-ref` | 锚点编号上标 |
+| `ol.comment-list` / `li.comment-item` | 段落后批注列表；`li` 的 `data-comment` 与锚点一一对应 |
+| `span.comment-target` | 批注所针对的原文词句 |
+| `span.comment-text` | 中文批注（问题 + 改法） |
+| `div.rewrite` / `p.rewrite-text` / `p.rewrite-note` | 斜体改写块（英文斜体 + 中文说明） |
+| `section#feedback` / `ul.strengths` / `ol.improvements` | 简短反馈 |
+| `section#model-essay` / `p.model-paragraph` / `p.model-wordcount` / `div.model-note` / `ol.structure-notes` | Band 8.0 范文与结构说明 |
 
-- Remove temporary files created only for the review process after the final DOCX passes validation.
-- Typical byproducts include `review_plan_*.json`, scratch extracted text files, or temporary unpacked DOCX folders.
-- Prefer writing temporary files to `/private/tmp`.
-- Do not delete the source essay, the final reviewed DOCX, or bundled Skill reference files.
+## 最小示例片段
 
-## Comment Rules
+```html
+<div class="paragraph-block">
+  <p class="original">Some people think practical skills are <mark class="comment" data-comment="1" data-target="very important">very important<sup class="comment-ref">1</sup></mark> for students.</p>
+  <ol class="comment-list">
+    <li class="comment-item" data-comment="1"><span class="comment-target">very important</span><span class="comment-text">“非常重要”过于笼统，建议改成更精确的程度表达，如 a key role。</span></li>
+  </ol>
+  <div class="rewrite">
+    <p class="rewrite-text"><em>Some people argue that practical skills play a key role in students’ education.</em></p>
+    <p class="rewrite-note">改写说明：把笼统的 very important 换成更精确的 a key role，语气更学术，原意不变。</p>
+  </div>
+</div>
+```
 
-- Use real Word comments.
-- Use `Cyber Esme` as the Word comment author.
-- Anchor comments to the shortest useful phrase.
-- For DOCX input, comments must be placed in the copied original essay paragraphs, not in newly appended duplicate essay text.
-- Do not anchor comments to prompt text, outline bullets, score sections, model essays, or other non-essay paragraphs.
-- If a non-empty `target` cannot be found inside the matched essay paragraph, fix the review plan instead of falling back to the whole paragraph.
-- Use English.
-- Keep comments short and teacher-like.
-- If a comment applies to a whole sentence because the issue is logic or task response, anchor it to the most problematic phrase or the first key phrase.
+## 批注写法
 
-## Rewrite Rules
+- 每条批注必须锚定学生原文的**具体词句**（`target` 必须在 `p.original` 中逐字出现；找不到就让生成脚本报错，不要退化成整段或题目）。
+- 编号唯一且从 1 连续递增；每个 `data-comment` 都有对应批注，每条批注都有对应锚点。
+- 批注用中文，写清**问题 + 怎么改**，例如“口语化，建议换成 …”“与前句重复，建议用 whereas 引出对比”。
+- 禁止脱离原文的泛泛建议（如“注意语法”“多积累词汇”），禁止把批注锚到题目、outline、评分区或范文上。
+- 中文批注中可保留被引用的英文原词、术语或改写示例；但这些英文只作为引用或术语出现，整条批注仍须是中文。
 
-- Italicize rewritten sentences/paragraphs.
-- Put the italic rewrite after the original unit.
-- Do not rewrite every sentence when the original is already acceptable.
-- Rewrites should reach a stable Band 7.5 standard while staying close to the student's intended meaning.
-- Prefer focused, realistic improvements over a complete Band 9 transformation.
+## 中英文分工
 
-## Font And Pagination Rules
+- **中文**：所有批注、评分说明、简短反馈、改写说明、范文结构说明、章节标题、页头标签、目标分说明。
+- **英文**：学生原文、Band 7.5 斜体改写、Band 8.0 范文。
+- 官方 band descriptor 可引用简短英文原文，但必须紧跟中文解释。
+- 评分项名称采用“中文（English criterion）”形式，英文只作为术语。
 
-- Use Times New Roman for all added review text and comments.
-- Keep the copied original document content at the start.
-- Preserve the copied DOCX's original `word/document.xml` root namespace declarations and `mc:Ignorable` prefix list.
-- Do not add big visible section headings such as `Task`, `Reviewed Essay`, `Score`, or `Model Essay`.
-- Insert a page break before the score and feedback page.
-- Keep the score lines and `To Reach Band 7.5 / 8.0` together after that page break.
-- Insert another page break before the model essay.
+## 自包含与打印
+
+- `<html lang="zh-CN">`、`<meta charset="utf-8">`，全文 UTF-8。
+- 样式全部写在 `<head>` 的内联 `<style>` 中；不出现外链 CSS/JS/字体/图片，不出现 `http(s)://` 形式的 `src`/`href`。
+- 不使用 `<script>`；不引用外部图标或 CDN。
+- 白底黑字，批注高亮在打印时仍可辨认；`@media print` 中保留 `mark.comment` 底色，并让反馈与范文另起一页。
+
+## 校验
+
+```bash
+python3 scripts/validate_review_html.py "MyEssay(reviewed).html" --plan review_plan.json --input-docx MyEssay.docx
+```
+
+校验器会检查：HTML 可解析、五段结构齐全、UTF-8、自包含、批注编号连续且与锚点一一对应、每条批注与反馈含中文、改写段数/批注条数/范文词数与 plan 一致。
+
+## 清理
+
+成功生成并通过校验后，删除临时 `review_plan_*.json`、临时提取文本等副产物；不要删除学生原稿、最终 `(reviewed).html` 或仓库内的参考文件。

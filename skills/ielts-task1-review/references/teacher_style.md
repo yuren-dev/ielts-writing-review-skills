@@ -2,10 +2,14 @@
 
 Use this guide after inspecting the visual prompt and before writing comments.
 
+## Language Of Comments
+
+The marking logic is unchanged: comments stay short, direct, anchored to specific words or phrases, and Task Achievement issues come first. Only the language changes — write every comment in Chinese, stating the problem and the fix in one sentence (for example, `Specify type: bar chart` becomes `图表类型不准确：应写 bar chart`; `slightly informal` becomes `偏口语，建议换成更正式的表达`). Quoted student words, data expressions, terminology, and rewrite examples stay in English inside the Chinese sentence. Visual notes, scoring notes, focus feedback, rewrite explanations and section headings are also Chinese; student answers, italic Band 7.5 rewrites and the Band 8.0 model answer remain English.
+
 ## Overall Marking Personality
 
 - Be short, direct, and practical.
-- Use English comments.
+- Write comments in Chinese, keeping the same short, direct, practical style; the English labels below are teacher-style reference points to render in Chinese.
 - Anchor comments to specific words or phrases.
 - Prioritize Task Achievement issues before style polishing.
 - Keep rewrites at a stable Band 7.5 standard: concise, formal, accurate, and comparison-driven.
@@ -42,10 +46,10 @@ Give a short score section first, then a concise focus list.
 Typical focus areas:
 
 ```text
-Eliminate small grammar errors: articles and plural forms.
-Avoid repetition: use figure, share, category, group.
-Use stronger comparison structures: that of, respectively, twice as high as.
-Be concise: do not repeat overview ideas.
+消除小语法错误：冠词与单复数。
+避免重复：使用 figure、share、category、group。
+使用更强的比较结构：that of、respectively、twice as high as。
+保持简洁：不要重复 overview 的内容。
 ```
 
 ## Model Answer Style
