@@ -1,13 +1,17 @@
 ---
 name: ielts-task1-review
-description: Use this skill to review IELTS Academic Writing Task 1 answers in a specific teacher's style. Trigger when the user asks for IELTS Task 1 correction, chart/table/map/process description review, Band 7.5 or 8.0 improvement, teacher-style marking, reviewed Word DOCX output, comments on a Task 1 answer, or a full Task 1 model answer based on a student's draft and visual prompt. Supports .docx input containing an embedded chart image and pasted text with an attached image or image path.
+description: Use this skill to review IELTS Academic Writing Task 1 answers in a specific teacher's style. Trigger when the user asks for IELTS Task 1 correction, chart/table/map/process description review, Band 7.5 or 8.0 improvement, teacher-style marking, comments on a Task 1 answer, a self-contained reviewed HTML report, Chinese marking and explanation, or a full Task 1 model answer based on a student's draft and visual prompt. Supports .docx input containing an embedded chart image and pasted text with an attached image or image path.
 ---
 
 # IELTS Task 1 Review
 
 ## Core Rule
 
-Analyze the visual prompt before correcting the student's writing. For Task 1, accurate chart/table/map/process understanding is part of Task Achievement, so do not polish language before identifying the main features.
+Analyze the visual prompt before correcting the student's writing. For Task 1, accurate chart/table/map/process understanding is part of Task Achievement, so do not polish language before identifying the main features. Every review must also meet these three hard requirements:
+
+1. **输出 HTML，不输出 DOCX。** 批改产物是单个自包含 HTML 文件：内联 CSS，图表以 base64 data URI 内嵌，浏览器直接打开可读、可打印。不要再生成 `(reviewed).docx`。
+2. **保留标注形式。** 批注必须锚定学生原文的具体词句，带连续编号上标，并在该段下方按编号列出；段落后保留 Band 7.5 斜体改写。不能退化成整段泛评或纯文本括号批注。
+3. **批改和讲解都用中文。** 所有批注、看图要点、评分说明、简短反馈、改写说明、范文结构说明、章节标题都用中文写；学生原文、斜体改写、范文保持英文。
 
 Use these references in order:
 
@@ -15,19 +19,20 @@ Use these references in order:
 2. Read `references/teacher_style.md` for Task 1 teacher-style marking.
 3. Read `references/ielts_task1_band_descriptors.md` before scoring.
 4. Use `references/teacher_samples_index.md` to find relevant samples, then read full samples from `references/teacher_samples/` when useful.
-5. Use `references/review_format.md` for DOCX layout and cleanup rules.
+5. Use `references/review_format.md` for the HTML structure, class names, and Chinese/English split.
 
 ## Workflow
 
 1. Identify the prompt, embedded image, and student answer.
-   - For `.docx`, extract embedded images with `scripts/extract_docx_images.py`.
+   - Normal input is an unreviewed `.docx` (the extraction flow is unchanged) or pasted text with an image path.
+   - For `.docx`, extract embedded images with `scripts/extract_docx_images.py` to a scratch directory such as `/tmp/ielts_task1_images_<unique>`.
    - Inspect the extracted image directly before reviewing. This is mandatory: never score or rewrite a Task 1 answer from the text alone.
    - For `.docx`, also run `scripts/extract_task1_input.py` so the review plan can distinguish prompt text from student answer paragraphs.
    - For pasted text, require an image attachment or image path.
-2. Build an internal visual facts note.
+2. Build an internal visual facts note, written in Chinese.
    - Identify visual type, units, categories, time periods, axes, legends, stages, and key values.
    - Identify overview-level features before local details.
-   - Keep this note internal unless the user explicitly asks to see it.
+   - These facts become the Chinese 看图要点 shown below the inlined chart; keep them concise and accurate.
 3. Check the student's Task Achievement.
    - Mark inaccurate chart type, wrong units, missing overview, wrong key feature selection, inaccurate values, or irrelevant details in comments.
 4. Select the closest teacher samples by visual type before writing comments.
@@ -37,47 +42,49 @@ Use these references in order:
 5. Split the answer into review units.
    - Use sentence-level units for grammar, articles, plural forms, data phrasing, collocation, and formal wording.
    - Use paragraph-level units for overview errors, poor grouping, data misreading, map/process sequencing, or missing comparisons.
-6. Add teacher-style comments.
-   - Use short English comments anchored to specific words or phrases.
-   - Use comments like `Specify type: bar chart`, `mention proportions`, `slightly repetitive`, `formal`, `Use comma`, `This is stated in overview`.
+6. Add teacher-style comments in Chinese.
+   - Keep comments short, practical, and anchored to specific words or phrases.
+   - Every comment must state the problem and the fix, e.g. `图表类型不准确：应写 bar chart` or `barely 偏口语，建议用 just under`.
+   - Prioritize Task Achievement problems before style polishing.
+   - Do not write generic advice detached from the original text.
 7. Add italic rewrites after relevant units.
-   - Rewrites must be concise, formal, data-accurate, and at a stable Band 7.5 standard.
+   - Rewrites stay in English, concise, formal, data-accurate, and at a stable Band 7.5 standard.
    - Keep rewrites learnable and close to the student's intended meaning; do not turn local fixes into over-complex Band 9 wording.
 8. Score the student's original answer strictly using official Task 1 descriptors.
    - Score Task Achievement, Coherence & Cohesion, Lexical Resource, Grammatical Range & Accuracy, and estimated overall band.
-   - For this teacher-style educational review, criterion scores and the estimated overall score may use whole or half bands, such as `6`, `6.5`, or `7`. Use `.5` when the original answer sits between adjacent whole-band descriptor anchors; do not force criterion scores to integers.
-9. Give concise Band 7.5 / 8.0-oriented feedback.
-   - Mention blockers preventing stable Band 7.5 first.
-   - Then mention the most useful move toward 8.0.
+   - Criterion scores and the estimated overall score may use whole or half bands, such as `6`, `6.5`, or `7`; do not force criterion scores to integers.
+   - Write `score_explanation` in Chinese, with evidence from the answer.
+9. Give concise Chinese feedback oriented to Band 7.5 / 8.0.
+   - The plan needs 3-5 Chinese `focus_feedback` items: first the blockers preventing stable Band 7.5, then the most useful moves toward 8.0.
 10. Write a 150-200 word model answer at a stable Band 8.0 standard.
-   - Use exactly four paragraphs:
-     1. Introduction: paraphrase the task prompt.
-     2. Overview: begin with `Overall` and summarize the main features.
-     3. Body paragraph 1: report the first logical group of details.
-     4. Body paragraph 2: report the second logical group of details.
-   - Leave one blank line between model answer paragraphs in the output DOCX.
-   - Align it with the visual and official criteria.
-   - Correct any inaccurate visual interpretation.
-   - It must be strong enough for Band 8.0: skilful key feature selection, clear overview, logical grouping, precise data language, natural comparisons, well-managed cohesion, and mostly error-free grammar.
-   - Keep it realistic and teacher-like, not an over-complex Band 9 answer.
-11. Generate a reviewed `.docx` by default.
-   - For input `MyAnswer.docx`, output `MyAnswer(reviewed).docx` in the same folder unless the user specifies another path.
-   - For DOCX input, create the reviewed file by copying the original DOCX first.
-   - Write comments directly into the copied original answer paragraphs; do not create a second copy of the student's answer for comments.
-   - Insert italic rewrites immediately after the matched original answer paragraph.
-   - Keep the original prompt and embedded visual in place; do not repeat the task prompt or image.
-   - For pasted text, output to `/Users/aaronliang/Desktop/IELTS_Task1_Reviewed_YYYYMMDD_HHMM.docx`.
-   - Use Times New Roman for all added review text and comments.
-   - Use `Cyber Esme` as the Word comment author.
-   - Do not include a visible `Visual Facts` section unless the user asks for it or `--include-visual-facts` is intentionally used.
-   - Do not add big visible section headings such as `Task`, `Reviewed Answer`, `Score`, or `Model Answer`.
-   - Preserve the original `word/document.xml` root namespace declarations and `mc:Ignorable`; do not leave undeclared prefixes such as `w14`, `w15`, `w16*`, or `wp14`.
-   - Insert a page break before the score and feedback page; keep the score lines and `To Reach Band 7.5 / 8.0` together; insert another page break before the model answer.
-   - Never overwrite the original answer unless explicitly requested.
-12. Clean up temporary byproducts after a successful review.
-   - Delete temporary files such as `review_plan_*.json`, extracted scratch images, and unpacked DOCX folders.
-   - `scripts/extract_docx_images.py` creates a unique `/private/tmp/ielts_task1_images_*` directory by default; delete that scratch directory after validation.
-   - Do not delete source answers, final reviewed DOCX files, or bundled reference files.
+    - Use exactly four paragraphs:
+      1. Introduction: paraphrase the task prompt.
+      2. Overview: begin with `Overall` and summarize the main features.
+      3. Body paragraph 1: report the first logical group of details.
+      4. Body paragraph 2: report the second logical group of details.
+    - Keep the model answer in English.
+    - Align it with the visual and official criteria; correct any inaccurate visual interpretation.
+    - It must be strong enough for Band 8.0: skilful key feature selection, clear overview, logical grouping, precise data language, natural comparisons, well-managed cohesion, and mostly error-free grammar.
+    - Keep it realistic and teacher-like, not an over-complex Band 9 answer.
+11. Build the review plan, then generate the reviewed HTML with the inlined chart.
+    - Reuse the existing review plan JSON shape (see below); do not change the plan format.
+    - Write `comments.text`, `visual_facts`, `score_explanation` and `focus_feedback` in Chinese; keep `prompt`, `review_units.original`, `rewrite` and `model_answer` in English.
+    - For input `MyAnswer.docx`, output `MyAnswer(reviewed).html` in the same folder unless the user specifies another path.
+    - Pass every extracted chart image with `--image`; the generator converts it to a base64 data URI. Multiple `--image` flags are allowed.
+    - The figure and Chinese 看图要点 go before the annotated answer paragraphs. The rule "inspect the visual first" is unchanged.
+    - Anchor comments only inside extracted student answer paragraphs, never inside prompt text or image captions. The generator stops with an error if a target is not found.
+    - Keep the original prompt and visual in the report; do not repeat the task prompt inside the answer body.
+    - The HTML must be self-contained: inline `<style>`, no external CSS/JS/fonts/images, UTF-8, `lang="zh-CN"`.
+    - Do not use `<script>`, CDN links, or visible legacy headings such as `Reviewed Answer`, `Score`, or `Model Answer`; use the Chinese section headings defined in `references/review_format.md`.
+    - For pasted text, pass `--output /path/IELTS_Task1_Reviewed_YYYYMMDD_HHMM.html`.
+    - Never overwrite the original answer unless explicitly requested. The generator avoids overwriting by default; use `--overwrite` only deliberately.
+12. Validate the HTML with the bundled validator. Do not deliver an unvalidated report.
+    - The validator checks the five-part structure, inlined chart and Chinese visual notes, comment numbering/anchoring, Chinese comments and feedback, self-containment, and counts against the plan.
+13. Reply in Chinese with the scores, a short feedback summary, and the model answer.
+    - Also give the absolute path of the generated HTML file.
+14. Clean up temporary byproducts after a successful review.
+    - Delete temporary files such as `review_plan_*.json`, extracted scratch images, and unpacked DOCX folders.
+    - Do not delete source answers, final reviewed `.html` files, or bundled reference files.
 
 ## Bundled Resources
 
@@ -87,29 +94,30 @@ Use these references in order:
 - `references/teacher_samples/*.json` and `*.md`: full extracted teacher-reviewed samples.
 - `references/sample_images/*`: extracted visual prompts from the 12 sample DOCX files.
 - `references/ielts_task1_band_descriptors.md`: complete Task 1 descriptors extracted from the local PDF.
-- `references/review_format.md`: canonical reviewed document structure.
+- `references/review_format.md`: HTML report structure, CSS class names, comment rules, and the Chinese/English split.
 - `scripts/extract_docx_images.py`: extract visual prompts from new input DOCX files to a unique scratch directory by default.
 - `scripts/extract_task1_input.py`: extract prompt, student answer, and student answer paragraph indices from a Task 1 DOCX.
-- `scripts/create_task1_review_docx.py`: create a reviewed DOCX from a JSON review plan; DOCX input is copied first, comments are anchored into extracted student answer paragraphs, and score/model sections are appended.
-- `scripts/create_and_validate_task1_review.py`: create a reviewed DOCX, validate it, and clean extracted scratch images in one command.
-- `scripts/validate_task1_review_docx.py`: verify comments, italic rewrites, student-answer paragraph comment anchoring when `--input-docx` is supplied, root namespace compatibility, page breaks, font, author, score lines, retained `To Reach Band 7.5 / 8.0` title, removed old headings, and model answer length/four-paragraph structure.
+- `scripts/create_task1_review_html.py`: render a self-contained reviewed HTML from the JSON review plan; chart images are inlined as base64, comments are anchored to the student's original phrases and numbered continuously, and explanations are in Chinese.
+- `scripts/validate_task1_review_html.py`: verify the five-part HTML structure, inlined chart and Chinese visual notes, comment numbering/anchoring, Chinese comments and feedback, self-containment, model answer length and four-paragraph structure, and counts against the plan.
 - `scripts/extract_task1_teacher_samples.py`: regenerate teacher sample references.
 - `scripts/extract_task1_band_descriptors.py`: regenerate descriptors from the PDF.
 
-## JSON Review Plan For DOCX Creation
+Legacy: `scripts/create_task1_review_docx.py`, `scripts/validate_task1_review_docx.py`, and `scripts/create_and_validate_task1_review.py` are kept for backwards compatibility but are no longer used by this skill.
 
-When using `scripts/create_task1_review_docx.py`, first produce a JSON file with this shape:
+## JSON Review Plan For HTML Creation
+
+`scripts/create_task1_review_html.py` reuses the same review plan format as the legacy DOCX script. First produce a JSON file with this shape (Chinese values shown for the fields that must be Chinese):
 
 ```json
 {
   "prompt": "Task prompt or visual prompt summary",
   "student_answer_paragraph_indices": [4, 6, 8, 10],
-  "visual_facts": ["Internal visual facts used for accuracy. These are not shown in the DOCX by default."],
+  "visual_facts": ["中文看图要点：图表类型、单位、时间范围、主要特征。"],
   "review_units": [
     {
       "original": "Student sentence or paragraph.",
-      "comments": [{"target": "specific phrase", "text": "Short teacher-style comment"}],
-      "rewrite": "Italic teacher-style improvement."
+      "comments": [{"target": "specific phrase", "text": "中文批注：问题 + 改法"}],
+      "rewrite": "English Band 7.5 rewrite."
     }
   ],
   "scores": {
@@ -119,8 +127,12 @@ When using `scripts/create_task1_review_docx.py`, first produce a JSON file with
     "Grammatical Range & Accuracy": "6.5",
     "Overall": "6.5"
   },
-  "score_explanation": ["Short evidence-based scoring note."],
-  "focus_feedback": ["Focus on overview accuracy and natural comparisons."],
+  "score_explanation": ["中文评分说明，带原文证据。"],
+  "focus_feedback": [
+    "中文优先改进点 1（阻止稳定 Band 7.5 的问题）。",
+    "中文优先改进点 2。",
+    "中文优先改进点 3（迈向 8.0 的方向）。"
+  ],
   "model_answer": [
     "Paragraph 1: introduction/paraphrase.",
     "Paragraph 2: Overall ...",
@@ -130,31 +142,29 @@ When using `scripts/create_task1_review_docx.py`, first produce a JSON file with
 }
 ```
 
-Scores are teacher-style estimates for the review output, so each criterion and `Overall` may be a whole band or a half band.
+`focus_feedback` must contain 3-5 items and `visual_facts` must be non-empty. Optional fields used by the HTML renderer: `rewrite_note` on a review unit (Chinese one-sentence rewrite explanation), `strengths` (Chinese strengths list), and `model_structure_notes` (four Chinese notes). When omitted, the renderer generates a reasonable Chinese note.
 
 Then run:
 
 ```bash
-python scripts/create_task1_review_docx.py review_plan.json --input-docx MyAnswer.docx --cleanup-plan
-python scripts/validate_task1_review_docx.py "MyAnswer(reviewed).docx" --input-docx MyAnswer.docx
+python3 scripts/extract_docx_images.py "MyAnswer.docx" --out /tmp/ielts_task1_images_run
+python3 scripts/create_task1_review_html.py review_plan.json --input-docx MyAnswer.docx --image /tmp/ielts_task1_images_run/MyAnswer_image1.png --cleanup-plan
+python3 scripts/validate_task1_review_html.py "MyAnswer(reviewed).html" --plan review_plan.json --input-docx MyAnswer.docx
 ```
 
-For a DOCX workflow with automatic image scratch cleanup, run:
-
-```bash
-python scripts/create_and_validate_task1_review.py review_plan.json --input-docx MyAnswer.docx
-```
-
-If the review plan is a permanent example/reference file, omit `--cleanup-plan`. Use `--include-visual-facts` only when the user explicitly asks to see the visual facts note in the reviewed DOCX.
+If the review plan is a permanent example/reference file, omit `--cleanup-plan`. For pasted text, pass the attached image path directly to `--image` and set `--output`.
 
 ## Quality Bar
 
-- The visual must be inspected before scoring or rewriting.
+- The visual must be inspected before scoring or rewriting, and the chart must be inlined in the HTML with Chinese 看图要点 below it.
 - Similar teacher samples should be selected by visual type before writing the final comments and model answer.
+- The reviewed report is a single self-contained HTML file, not a DOCX.
+- All comments, visual notes, feedback, scoring explanations, rewrite notes, structure notes, and section headings are in Chinese; student original, italic rewrites, and model answer stay in English.
 - Comments must stay within the extracted student answer paragraphs; prompt text and image captions are not valid anchor targets.
-- The reviewed DOCX must contain real Word comments, not bracketed notes.
+- Comments must be anchored to specific text and numbered continuously; every `data-comment` matches a comment item and vice versa.
 - Important Task Achievement issues must be commented first.
 - Italic rewrites must be data-accurate and written at a stable Band 7.5 standard.
 - The score must evaluate the original answer.
-- The model answer must be exactly 4 paragraphs with one blank line between paragraphs, 150-200 words, and should stand securely at Band 8.0 according to the official Task 1 descriptors.
+- The model answer must be exactly 4 paragraphs, 150-200 words, and should stand securely at Band 8.0 according to the official Task 1 descriptors.
 - The style should look closer to the teacher's Task 1 samples than to a generic IELTS tutor.
+- The generated HTML must pass `scripts/validate_task1_review_html.py`.

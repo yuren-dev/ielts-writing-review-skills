@@ -2,10 +2,14 @@
 
 Use this guide as the highest-priority style reference after reading relevant full samples.
 
+## Language Of Comments
+
+The marking logic is unchanged: comments stay short, direct, anchored to concrete words or phrases, and correction-oriented. Only the language changes — write every comment in Chinese, stating the problem and the fix in one sentence (for example, `Try to be more precise` becomes `表达过于笼统，建议换成更精确的说法`; `repetition` becomes `与前句重复，建议合并或换用 whereas 引出对比`). Quoted student words, terminology, and rewrite examples stay in English inside the Chinese sentence. Scoring notes, focus feedback, rewrite explanations and section headings are also Chinese; student essays, italic Band 7.5 rewrites and the Band 8.0 model essay remain English.
+
 ## Overall Marking Personality
 
 - Be direct, short, and practical.
-- Use English comments.
+- Write comments in Chinese, keeping the same short, direct, practical style; the English labels below are teacher-style reference points to render in Chinese.
 - Comment on concrete words or phrases rather than writing long paragraph feedback.
 - Prefer correction-oriented notes over motivational explanations.
 - Keep italic rewrites at a stable Band 7.5 level: natural, formal, concise, but not excessively sophisticated.
@@ -41,11 +45,11 @@ After comments and rewrites, give a short official-criteria score section, then 
 Use a tone like:
 
 ```text
-You are close to a secure Band 7.5. To move toward 8.0, focus on:
-Grammar accuracy
-Natural collocations
-Conciseness
-More precise support for main ideas
+你已经接近稳定的 Band 7.5。要向 8.0 迈进，重点放在：
+语法准确性
+自然搭配
+简洁
+为主观点提供更具体的支撑
 ```
 
 Do not write a long lecture. The teacher's samples tend to identify the main blockers quickly.
